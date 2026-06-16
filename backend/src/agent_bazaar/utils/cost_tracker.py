@@ -5,11 +5,12 @@ logger = logging.getLogger("agent_bazaar.cost")
 
 # Fallback pricing (USD per million tokens) for models LiteLLM doesn't yet know
 _FALLBACK: dict[str, tuple[float, float]] = {
-    "claude-haiku-4-5-20251001":  (0.80,  4.00),
-    "claude-sonnet-4-6":          (3.00, 15.00),
-    "gemini/gemini-2.0-flash":    (0.10,  0.40),
-    "gemini/gemini-1.5-flash":    (0.075, 0.30),
-    "gemini/gemini-1.5-pro":      (1.25,  5.00),
+    "claude-haiku-4-5-20251001":       (0.80,  4.00),
+    "claude-sonnet-4-6":               (3.00, 15.00),
+    "gemini/gemini-2.0-flash":         (0.10,  0.40),
+    "gemini/gemini-2.0-flash-lite":    (0.075, 0.30),
+    "gemini/gemini-1.5-flash":         (0.075, 0.30),
+    "gemini/gemini-1.5-pro":           (1.25,  5.00),
 }
 
 

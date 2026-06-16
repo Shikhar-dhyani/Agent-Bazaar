@@ -6,8 +6,8 @@ from agent_bazaar.models.subtask import Capability
 # To switch provider for specialist agents, change the model= field below.
 # Anthropic fast    : "claude-haiku-4-5-20251001"
 # Anthropic thorough: "claude-sonnet-4-6"
-# Gemini fast       : "gemini/gemini-2.0-flash"
-# Gemini thorough   : "gemini/gemini-1.5-pro"
+# Gemini fast       : "gemini/gemini-2.0-flash-lite"
+# Gemini thorough   : "gemini/gemini-2.0-flash"
 
 _INITIAL_PROFILES: List[AgentProfile] = [
     # Web Search
@@ -19,7 +19,7 @@ _INITIAL_PROFILES: List[AgentProfile] = [
         reputation={Capability.WEB_SEARCH.value: 0.60},
         base_cost=2.0,
         base_latency=3.0,
-        model="claude-haiku-4-5-20251001",
+        model="gemini/gemini-2.0-flash-lite",
     ),
     AgentProfile(
         id="web_search_thorough",
@@ -29,7 +29,7 @@ _INITIAL_PROFILES: List[AgentProfile] = [
         reputation={Capability.WEB_SEARCH.value: 0.70},
         base_cost=8.0,
         base_latency=10.0,
-        model="claude-sonnet-4-6",
+        model="gemini/gemini-2.0-flash",
     ),
     # Code Generation
     AgentProfile(
@@ -40,7 +40,7 @@ _INITIAL_PROFILES: List[AgentProfile] = [
         reputation={Capability.CODE_GENERATION.value: 0.65},
         base_cost=2.5,
         base_latency=4.0,
-        model="claude-haiku-4-5-20251001",
+        model="gemini/gemini-2.0-flash-lite",
     ),
     AgentProfile(
         id="code_gen_thorough",
@@ -50,7 +50,7 @@ _INITIAL_PROFILES: List[AgentProfile] = [
         reputation={Capability.CODE_GENERATION.value: 0.80},
         base_cost=9.0,
         base_latency=12.0,
-        model="claude-sonnet-4-6",
+        model="gemini/gemini-2.0-flash",
     ),
     # Data Analysis
     AgentProfile(
@@ -61,7 +61,7 @@ _INITIAL_PROFILES: List[AgentProfile] = [
         reputation={Capability.DATA_ANALYSIS.value: 0.60},
         base_cost=2.0,
         base_latency=3.5,
-        model="claude-haiku-4-5-20251001",
+        model="gemini/gemini-2.0-flash-lite",
     ),
     AgentProfile(
         id="data_analysis_thorough",
@@ -71,7 +71,7 @@ _INITIAL_PROFILES: List[AgentProfile] = [
         reputation={Capability.DATA_ANALYSIS.value: 0.75},
         base_cost=8.0,
         base_latency=10.0,
-        model="claude-sonnet-4-6",
+        model="gemini/gemini-2.0-flash",
     ),
     # Fact Checking
     AgentProfile(
@@ -82,7 +82,7 @@ _INITIAL_PROFILES: List[AgentProfile] = [
         reputation={Capability.FACT_CHECKING.value: 0.62},
         base_cost=1.5,
         base_latency=2.5,
-        model="claude-haiku-4-5-20251001",
+        model="gemini/gemini-2.0-flash-lite",
     ),
     AgentProfile(
         id="fact_check_thorough",
@@ -92,7 +92,7 @@ _INITIAL_PROFILES: List[AgentProfile] = [
         reputation={Capability.FACT_CHECKING.value: 0.78},
         base_cost=7.0,
         base_latency=9.0,
-        model="claude-sonnet-4-6",
+        model="gemini/gemini-2.0-flash",
     ),
     # Text Synthesis
     AgentProfile(
@@ -103,7 +103,7 @@ _INITIAL_PROFILES: List[AgentProfile] = [
         reputation={Capability.TEXT_SYNTHESIS.value: 0.65},
         base_cost=1.5,
         base_latency=2.0,
-        model="claude-haiku-4-5-20251001",
+        model="gemini/gemini-2.0-flash-lite",
     ),
     AgentProfile(
         id="text_synthesis_thorough",
@@ -113,7 +113,7 @@ _INITIAL_PROFILES: List[AgentProfile] = [
         reputation={Capability.TEXT_SYNTHESIS.value: 0.75},
         base_cost=6.0,
         base_latency=8.0,
-        model="claude-sonnet-4-6",
+        model="gemini/gemini-2.0-flash",
     ),
 ]
 

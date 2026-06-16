@@ -8,11 +8,11 @@ class Settings(BaseSettings):
     gemini_api_key: Optional[str] = None
 
     # --- Model names — change these to switch providers ---
-    # Anthropic examples : "claude-sonnet-4-6"  /  "claude-haiku-4-5-20251001"
-    # Gemini examples     : "gemini/gemini-1.5-pro"  /  "gemini/gemini-2.0-flash"
-    broker_model: str = "claude-sonnet-4-6"
-    aggregator_model: str = "claude-sonnet-4-6"
-    scorer_model: str = "claude-haiku-4-5-20251001"
+    # Anthropic : "claude-sonnet-4-6"          / "claude-haiku-4-5-20251001"
+    # Gemini    : "gemini/gemini-2.0-flash"     / "gemini/gemini-2.0-flash-lite"
+    broker_model: str = "gemini/gemini-2.0-flash"
+    aggregator_model: str = "gemini/gemini-2.0-flash"
+    scorer_model: str = "gemini/gemini-2.0-flash-lite"
 
     # --- Optional infrastructure ---
     redis_url: Optional[str] = None
