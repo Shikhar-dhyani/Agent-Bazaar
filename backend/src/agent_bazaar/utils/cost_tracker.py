@@ -1,24 +1,32 @@
 import logging
+import litellm
 
 logger = logging.getLogger("agent_bazaar.cost")
 
-# USD per million tokens  (input, output)
-_PRICING: dict[str, tuple[float, float]] = {
-    "claude-haiku-4-5-20251001": (0.80, 4.00),
-    "claude-sonnet-4-6":         (3.00, 15.00),
+# Fallback pricing (USD per million tokens) for models LiteLLM doesn't yet know
+_FALLBACK: dict[str, tuple[float, float]] = {
+    "claude-haiku-4-5-20251001":  (0.80,  4.00),
+    "claude-sonnet-4-6":          (3.00, 15.00),
+    "gemini/gemini-2.0-flash":    (0.10,  0.40),
+    "gemini/gemini-1.5-flash":    (0.075, 0.30),
+    "gemini/gemini-1.5-pro":      (1.25,  5.00),
 }
 
-_DEFAULT_PRICE = (3.00, 15.00)
 
+def log_usage(model: str, response, caller: str) -> float:
+    """Log token counts and USD cost for one API call. Returns cost."""
+    usage = getattr(response, "usage", None) or {}
+    in_tok  = getattr(usage, "prompt_tokens",     0) or 0
+    out_tok = getattr(usage, "completion_tokens",  0) or 0
 
-def log_usage(model: str, usage, caller: str) -> float:
-    """Log token counts and estimated USD cost for one API call. Returns cost."""
-    in_tok = getattr(usage, "input_tokens", 0) or 0
-    out_tok = getattr(usage, "output_tokens", 0) or 0
-    in_price, out_price = _PRICING.get(model, _DEFAULT_PRICE)
-    cost = (in_tok * in_price + out_tok * out_price) / 1_000_000
+    try:
+        cost = litellm.completion_cost(completion_response=response)
+    except Exception:
+        in_p, out_p = _FALLBACK.get(model, (3.00, 15.00))
+        cost = (in_tok * in_p + out_tok * out_p) / 1_000_000
+
     logger.info(
-        "[COST] %-35s | model=%-30s | in=%5d  out=%5d | $%.6f",
+        "[COST] %-40s | model=%-35s | in=%5d  out=%5d | $%.6f",
         caller, model, in_tok, out_tok, cost,
     )
     return cost

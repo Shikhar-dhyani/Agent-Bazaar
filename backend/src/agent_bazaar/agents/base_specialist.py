@@ -1,9 +1,8 @@
 import json
-import anthropic
 from agent_bazaar.models.bid import Bid
 from agent_bazaar.models.subtask import Subtask
 from agent_bazaar.models.agent_profile import AgentProfile
-from agent_bazaar.config import settings
+from agent_bazaar.utils.llm_client import complete
 from agent_bazaar.utils.cost_tracker import log_usage
 
 _BID_SYSTEM = "You are a specialist agent assessing a bid. Return only valid JSON, no markdown."
@@ -44,7 +43,6 @@ Provide a complete, well-structured response."""
 class BaseSpecialist:
     def __init__(self, profile: AgentProfile) -> None:
         self.profile = profile
-        self._client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
 
     async def bid(self, subtask: Subtask, context: str = "") -> Bid:
         capability = subtask.required_capability.value
@@ -69,19 +67,13 @@ class BaseSpecialist:
         )
 
         try:
-            response = await self._client.messages.create(
-                model=self.profile.model,
-                max_tokens=512,
-                system=_BID_SYSTEM,
-                messages=[{"role": "user", "content": prompt}],
-            )
-            log_usage(self.profile.model, response.usage, f"specialist/bid [{self.profile.name}]")
-            raw = response.content[0].text.strip()
-            if "```" in raw:
-                raw = raw.split("```")[1]
-                if raw.startswith("json"):
-                    raw = raw[4:]
-            data = json.loads(raw)
+            text, response = await complete(self.profile.model, _BID_SYSTEM, prompt, max_tokens=512)
+            log_usage(self.profile.model, response, f"specialist/bid [{self.profile.name}]")
+            if "```" in text:
+                text = text.split("```")[1]
+                if text.startswith("json"):
+                    text = text[4:]
+            data = json.loads(text)
 
             confidence = max(0.0, min(1.0, float(data.get("confidence", 0.5))))
             cost_mult = max(0.5, min(3.0, float(data.get("cost_multiplier", 1.0))))
@@ -112,11 +104,6 @@ class BaseSpecialist:
             description=subtask.description,
             context=context or "None",
         )
-        response = await self._client.messages.create(
-            model=self.profile.model,
-            max_tokens=2048,
-            system=_EXECUTE_SYSTEM,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        log_usage(self.profile.model, response.usage, f"specialist/execute [{self.profile.name}]")
-        return response.content[0].text.strip()
+        text, response = await complete(self.profile.model, _EXECUTE_SYSTEM, prompt, max_tokens=2048)
+        log_usage(self.profile.model, response, f"specialist/execute [{self.profile.name}]")
+        return text

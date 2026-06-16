@@ -31,6 +31,10 @@ services:
       - "8000:8000"
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - BROKER_MODEL=${BROKER_MODEL:-claude-sonnet-4-6}
+      - AGGREGATOR_MODEL=${AGGREGATOR_MODEL:-claude-sonnet-4-6}
+      - SCORER_MODEL=${SCORER_MODEL:-claude-haiku-4-5-20251001}
       - REDIS_URL=redis://redis:6379
       - DATABASE_URL=postgresql+asyncpg://bazaar:bazaar@postgres:5432/agent_bazaar
     depends_on:

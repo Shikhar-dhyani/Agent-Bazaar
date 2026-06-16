@@ -3,6 +3,12 @@ from typing import Dict, List, Optional
 from agent_bazaar.models.agent_profile import AgentProfile, AgentTier
 from agent_bazaar.models.subtask import Capability
 
+# To switch provider for specialist agents, change the model= field below.
+# Anthropic fast    : "claude-haiku-4-5-20251001"
+# Anthropic thorough: "claude-sonnet-4-6"
+# Gemini fast       : "gemini/gemini-2.0-flash"
+# Gemini thorough   : "gemini/gemini-1.5-pro"
+
 _INITIAL_PROFILES: List[AgentProfile] = [
     # Web Search
     AgentProfile(

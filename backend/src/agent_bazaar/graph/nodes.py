@@ -1,8 +1,8 @@
 import asyncio
 from datetime import datetime
 from typing import Any, Dict, List
-import anthropic
 from agent_bazaar.graph.state import MarketplaceState
+from agent_bazaar.utils.llm_client import complete
 from agent_bazaar.utils.cost_tracker import log_usage
 from agent_bazaar.models.task import Task, TaskStatus
 from agent_bazaar.models.subtask import Subtask, SubtaskStatus
@@ -224,18 +224,13 @@ async def aggregate_node(state: MarketplaceState) -> dict:
             parts.append(f"### {st.description}\n{results[st.id]}")
 
     combined = "\n\n".join(parts)
-    client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
-    response = await client.messages.create(
-        model="claude-sonnet-4-6",
+    final_answer, response = await complete(
+        settings.aggregator_model,
+        "You are an aggregation agent. Synthesize the results of multiple completed subtasks into a single coherent, well-structured final answer. Do not just concatenate — synthesize.",
+        f"Original request: {task.raw_request}\n\nSubtask results:\n{combined}\n\nProvide a comprehensive final answer.",
         max_tokens=4096,
-        system="You are an aggregation agent. Synthesize the results of multiple completed subtasks into a single coherent, well-structured final answer. Do not just concatenate — synthesize.",
-        messages=[{
-            "role": "user",
-            "content": f"Original request: {task.raw_request}\n\nSubtask results:\n{combined}\n\nProvide a comprehensive final answer.",
-        }],
     )
-    log_usage("claude-sonnet-4-6", response.usage, "aggregate/synthesize")
-    final_answer = response.content[0].text.strip()
+    log_usage(settings.aggregator_model, response, "aggregate/synthesize")
     task.final_answer = final_answer
     task.status = TaskStatus.COMPLETED
     task.completed_at = datetime.utcnow()

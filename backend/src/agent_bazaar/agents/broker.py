@@ -1,9 +1,9 @@
 import json
 from typing import List
-import anthropic
 from agent_bazaar.models.task import Task
 from agent_bazaar.models.subtask import Subtask, Capability
 from agent_bazaar.config import settings
+from agent_bazaar.utils.llm_client import complete
 from agent_bazaar.utils.cost_tracker import log_usage
 
 _BROKER_SYSTEM = """You are a task decomposition broker for a multi-agent marketplace.
@@ -22,18 +22,15 @@ _BROKER_PROMPT = "Decompose this task into atomic subtasks:\n\n{request}"
 
 
 class BrokerAgent:
-    def __init__(self) -> None:
-        self._client = anthropic.AsyncAnthropic(api_key=settings.anthropic_api_key)
-
     async def decompose(self, task: Task) -> List[Subtask]:
-        response = await self._client.messages.create(
-            model="claude-sonnet-4-6",
+        raw, response = await complete(
+            settings.broker_model,
+            _BROKER_SYSTEM,
+            _BROKER_PROMPT.format(request=task.raw_request),
             max_tokens=2048,
-            system=_BROKER_SYSTEM,
-            messages=[{"role": "user", "content": _BROKER_PROMPT.format(request=task.raw_request)}],
         )
-        log_usage("claude-sonnet-4-6", response.usage, "broker/decompose")
-        raw = response.content[0].text.strip()
+        log_usage(settings.broker_model, response, "broker/decompose")
+
         # Strip accidental markdown fences
         if "```" in raw:
             parts = raw.split("```")
@@ -43,9 +40,7 @@ class BrokerAgent:
 
         data = json.loads(raw)
 
-        # First pass: build a stable mapping from whatever the LLM used as IDs
-        # (integers, "st_0" strings, arbitrary strings) to our canonical "st_N" IDs.
-        # This prevents mismatches like id="st_0" vs dependency_ids=["0"].
+        # Build stable mapping from whatever the LLM used as IDs to canonical "st_N" IDs
         llm_to_ours: dict[str, str] = {}
         for i, item in enumerate(data):
             llm_id = str(item.get("id", i))
