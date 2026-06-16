@@ -14,6 +14,18 @@ logging.basicConfig(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    from agent_bazaar.config import settings
+    logger = logging.getLogger("agent_bazaar.startup")
+    if not settings.anthropic_api_key and not settings.gemini_api_key:
+        logger.error(
+            "No API key configured! Set GEMINI_API_KEY (or ANTHROPIC_API_KEY) in your .env file. "
+            "All tasks will fail until a key is provided."
+        )
+    else:
+        provider = "Anthropic" if settings.anthropic_api_key else "Gemini"
+        logger.info("API key configured for provider: %s", provider)
+        logger.info("Models — broker=%s  aggregator=%s  scorer=%s",
+                    settings.broker_model, settings.aggregator_model, settings.scorer_model)
     await create_tables()
     yield
 

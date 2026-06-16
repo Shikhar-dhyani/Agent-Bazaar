@@ -85,7 +85,11 @@ export default function App() {
         setActiveSubtaskId(event.subtask_id)
         setTask(prev => prev ? { ...prev, status: 'executing' } : prev)
         setSubtasks(prev =>
-          prev.map(s => s.id === event.subtask_id ? { ...s, status: 'executing' } : s)
+          prev.map(s =>
+            s.id === event.subtask_id
+              ? { ...s, status: 'executing', result: event.result_preview }
+              : s
+          )
         )
         break
 

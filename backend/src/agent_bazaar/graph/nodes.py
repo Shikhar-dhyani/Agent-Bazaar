@@ -36,7 +36,7 @@ async def decompose_node(state: MarketplaceState) -> dict:
         "events": state["events"] + [{
             "type": "task_decomposed",
             "task_id": task.id,
-            "subtasks": [s.model_dump() for s in subtasks],
+            "subtasks": [s.model_dump(mode="json") for s in subtasks],
         }],
     }
 
@@ -73,7 +73,7 @@ async def collect_bids_node(state: MarketplaceState) -> dict:
         "type": "bid_submitted",
         "task_id": state["task"].id,
         "subtask_id": current_id,
-        "bid": b.model_dump(),
+        "bid": b.model_dump(mode="json"),
     } for b in bid_list]
 
     return {
@@ -104,8 +104,8 @@ async def clear_auction_node(state: MarketplaceState) -> dict:
             "type": "auction_cleared",
             "task_id": state["task"].id,
             "subtask_id": current_id,
-            "winner": winner.model_dump() if winner else None,
-            "all_bids": [b.model_dump() for b in bids],
+            "winner": winner.model_dump(mode="json") if winner else None,
+            "all_bids": [b.model_dump(mode="json") for b in bids],
         }],
     }
 

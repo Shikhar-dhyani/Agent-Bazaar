@@ -32,9 +32,12 @@ services:
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - BROKER_MODEL=${BROKER_MODEL:-claude-sonnet-4-6}
-      - AGGREGATOR_MODEL=${AGGREGATOR_MODEL:-claude-sonnet-4-6}
-      - SCORER_MODEL=${SCORER_MODEL:-claude-haiku-4-5-20251001}
+      - BROKER_MODEL=${BROKER_MODEL:-gemini/gemini-2.5-flash}
+      - AGGREGATOR_MODEL=${AGGREGATOR_MODEL:-gemini/gemini-2.5-flash}
+      - SCORER_MODEL=${SCORER_MODEL:-gemini/gemini-2.5-flash-lite}
+      - SPECIALIST_FAST_MODEL=${SPECIALIST_FAST_MODEL:-gemini/gemini-2.5-flash-lite}
+      - SPECIALIST_THOROUGH_MODEL=${SPECIALIST_THOROUGH_MODEL:-gemini/gemini-2.5-flash}
+      - FALLBACK_MODEL=${FALLBACK_MODEL:-gemini/gemini-2.0-flash}
       - REDIS_URL=redis://redis:6379
       - DATABASE_URL=postgresql+asyncpg://bazaar:bazaar@postgres:5432/agent_bazaar
     depends_on:

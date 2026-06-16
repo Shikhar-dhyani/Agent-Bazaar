@@ -31,12 +31,21 @@ class BrokerAgent:
         )
         log_usage(settings.broker_model, response, "broker/decompose")
 
-        # Strip accidental markdown fences
+        # Extract the JSON array — handle markdown fences and leading/trailing prose
         if "```" in raw:
             parts = raw.split("```")
             raw = parts[1] if len(parts) > 1 else parts[0]
             if raw.startswith("json"):
                 raw = raw[4:]
+
+        raw = raw.strip()
+
+        # If the model still wrapped it, find the outermost [...] array
+        if not raw.startswith("["):
+            start = raw.find("[")
+            end = raw.rfind("]")
+            if start != -1 and end != -1:
+                raw = raw[start:end + 1]
 
         data = json.loads(raw)
 

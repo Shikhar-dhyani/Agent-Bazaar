@@ -1,4 +1,5 @@
-import { CheckCircle2, Circle, Clock, Loader2, XCircle, Zap } from 'lucide-react'
+import { useState } from 'react'
+import { CheckCircle2, Circle, Clock, Loader2, XCircle, Zap, ChevronDown, ChevronRight } from 'lucide-react'
 import type { Subtask, SubtaskStatus, Bid, Capability } from '../types'
 
 const CAPABILITY_COLORS: Record<Capability, string> = {
@@ -41,6 +42,8 @@ interface Props {
 }
 
 export function SubtaskList({ subtasks, winners, activeSubtaskId }: Props) {
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+
   if (subtasks.length === 0) {
     return (
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 h-full">
@@ -62,11 +65,13 @@ export function SubtaskList({ subtasks, winners, activeSubtaskId }: Props) {
         {[...subtasks].sort((a, b) => a.order - b.order).map((subtask) => {
           const winner = winners[subtask.id]
           const isActive = subtask.id === activeSubtaskId
+          const isExpanded = subtask.id === expandedId
+          const hasResult = !!subtask.result
 
           return (
             <div
               key={subtask.id}
-              className={`border rounded-lg p-3 transition-colors ${
+              className={`border rounded-lg transition-colors ${
                 isActive
                   ? 'border-violet-600 bg-violet-950'
                   : subtask.status === 'completed'
@@ -74,32 +79,51 @@ export function SubtaskList({ subtasks, winners, activeSubtaskId }: Props) {
                   : 'border-gray-800 bg-gray-800/30'
               }`}
             >
-              <div className="flex items-start gap-2">
-                <div className="mt-0.5 shrink-0">
-                  <StatusIcon status={subtask.status} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-200 leading-snug">{subtask.description}</p>
-                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                    <span className={`text-xs px-2 py-0.5 rounded border font-medium ${CAPABILITY_COLORS[subtask.required_capability]}`}>
-                      {CAPABILITY_LABELS[subtask.required_capability]}
-                    </span>
-                    {subtask.dependency_ids.length > 0 && (
-                      <span className="text-xs text-gray-600">
-                        deps: {subtask.dependency_ids.join(', ')}
-                      </span>
-                    )}
-                    {winner && (
-                      <span className="text-xs text-gray-400">
-                        → <span className="text-gray-300">{winner.agent_id.replace(/_/g, '-')}</span>
-                      </span>
-                    )}
-                    {subtask.quality_score !== undefined && (
-                      <ScoreBadge score={subtask.quality_score} />
-                    )}
+              <button
+                className="w-full text-left p-3 cursor-pointer"
+                onClick={() => setExpandedId(isExpanded ? null : subtask.id)}
+              >
+                <div className="flex items-start gap-2">
+                  <div className="mt-0.5 shrink-0">
+                    <StatusIcon status={subtask.status} />
                   </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-200 leading-snug">{subtask.description}</p>
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                      <span className={`text-xs px-2 py-0.5 rounded border font-medium ${CAPABILITY_COLORS[subtask.required_capability]}`}>
+                        {CAPABILITY_LABELS[subtask.required_capability]}
+                      </span>
+                      {subtask.dependency_ids.length > 0 && (
+                        <span className="text-xs text-gray-600">
+                          deps: {subtask.dependency_ids.join(', ')}
+                        </span>
+                      )}
+                      {winner && (
+                        <span className="text-xs text-gray-400">
+                          → <span className="text-gray-300">{winner.agent_id.replace(/_/g, '-')}</span>
+                        </span>
+                      )}
+                      {subtask.quality_score !== undefined && (
+                        <ScoreBadge score={subtask.quality_score} />
+                      )}
+                    </div>
+                  </div>
+                  {hasResult && (
+                    <div className="shrink-0 text-gray-600 mt-0.5">
+                      {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                    </div>
+                  )}
                 </div>
-              </div>
+              </button>
+
+              {isExpanded && subtask.result && (
+                <div className="px-3 pb-3 pt-0 border-t border-gray-700/50 mt-1">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1.5 font-semibold">Result preview</p>
+                  <p className="text-xs text-gray-300 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+                    {subtask.result}
+                  </p>
+                </div>
+              )}
             </div>
           )
         })}

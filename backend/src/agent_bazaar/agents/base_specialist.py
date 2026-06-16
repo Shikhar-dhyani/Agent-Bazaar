@@ -73,6 +73,13 @@ class BaseSpecialist:
                 text = text.split("```")[1]
                 if text.startswith("json"):
                     text = text[4:]
+            text = text.strip()
+            # Find outermost {...} if the model added surrounding prose
+            if not text.startswith("{"):
+                start = text.find("{")
+                end = text.rfind("}")
+                if start != -1 and end != -1:
+                    text = text[start:end + 1]
             data = json.loads(text)
 
             confidence = max(0.0, min(1.0, float(data.get("confidence", 0.5))))

@@ -26,6 +26,14 @@ async def complete(model: str, system: str, user: str, max_tokens: int = 2048) -
         {"role": "system", "content": system},
         {"role": "user",   "content": user},
     ]
-    response = await litellm.acompletion(model=model, messages=messages, max_tokens=max_tokens)
+    # num_retries=5 handles 429 RPM bursts; fallbacks handles 503 overload
+    fallbacks = [settings.fallback_model] if settings.fallback_model and settings.fallback_model != model else None
+    response = await litellm.acompletion(
+        model=model,
+        messages=messages,
+        max_tokens=max_tokens,
+        num_retries=5,
+        **({"fallbacks": fallbacks} if fallbacks else {}),
+    )
     text = response.choices[0].message.content or ""
     return text.strip(), response

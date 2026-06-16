@@ -20,5 +20,6 @@ class Task(BaseModel):
     raw_request: str
     status: TaskStatus = TaskStatus.PENDING
     final_answer: Optional[str] = None
+    error_message: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     completed_at: Optional[datetime] = None

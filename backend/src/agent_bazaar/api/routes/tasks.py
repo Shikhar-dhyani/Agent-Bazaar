@@ -1,8 +1,11 @@
 import asyncio
+import logging
 from typing import Any, Dict, List
 from fastapi import APIRouter
 from pydantic import BaseModel
 from agent_bazaar.models.task import Task, TaskStatus
+
+logger = logging.getLogger("agent_bazaar.tasks")
 from agent_bazaar.models.subtask import Subtask
 from agent_bazaar.models.bid import Bid
 from agent_bazaar.graph.marketplace import marketplace_graph
@@ -94,6 +97,7 @@ async def _run_task(task: Task) -> None:
             _broadcast(task.id, new_events)
 
     except Exception as exc:
+        logger.exception("Task %s failed: %s", task.id, exc)
         error_event: Dict[str, Any] = {
             "type": "error",
             "task_id": task.id,
@@ -102,6 +106,7 @@ async def _run_task(task: Task) -> None:
         _task_events.setdefault(task.id, []).append(error_event)
         _broadcast(task.id, [error_event])
         task.status = TaskStatus.FAILED
+        task.error_message = str(exc)
         _tasks[task.id] = task
 
 
