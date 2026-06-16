@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any, Dict, List
 import anthropic
 from agent_bazaar.graph.state import MarketplaceState
+from agent_bazaar.utils.cost_tracker import log_usage
 from agent_bazaar.models.task import Task, TaskStatus
 from agent_bazaar.models.subtask import Subtask, SubtaskStatus
 from agent_bazaar.models.bid import Bid
@@ -233,6 +234,7 @@ async def aggregate_node(state: MarketplaceState) -> dict:
             "content": f"Original request: {task.raw_request}\n\nSubtask results:\n{combined}\n\nProvide a comprehensive final answer.",
         }],
     )
+    log_usage("claude-sonnet-4-6", response.usage, "aggregate/synthesize")
     final_answer = response.content[0].text.strip()
     task.final_answer = final_answer
     task.status = TaskStatus.COMPLETED

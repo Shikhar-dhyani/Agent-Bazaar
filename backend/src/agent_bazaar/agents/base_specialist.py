@@ -4,6 +4,7 @@ from agent_bazaar.models.bid import Bid
 from agent_bazaar.models.subtask import Subtask
 from agent_bazaar.models.agent_profile import AgentProfile
 from agent_bazaar.config import settings
+from agent_bazaar.utils.cost_tracker import log_usage
 
 _BID_SYSTEM = "You are a specialist agent assessing a bid. Return only valid JSON, no markdown."
 
@@ -74,6 +75,7 @@ class BaseSpecialist:
                 system=_BID_SYSTEM,
                 messages=[{"role": "user", "content": prompt}],
             )
+            log_usage(self.profile.model, response.usage, f"specialist/bid [{self.profile.name}]")
             raw = response.content[0].text.strip()
             if "```" in raw:
                 raw = raw.split("```")[1]
@@ -116,4 +118,5 @@ class BaseSpecialist:
             system=_EXECUTE_SYSTEM,
             messages=[{"role": "user", "content": prompt}],
         )
+        log_usage(self.profile.model, response.usage, f"specialist/execute [{self.profile.name}]")
         return response.content[0].text.strip()

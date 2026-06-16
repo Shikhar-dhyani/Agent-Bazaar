@@ -2,6 +2,7 @@ import json
 import anthropic
 from agent_bazaar.models.subtask import Subtask
 from agent_bazaar.config import settings
+from agent_bazaar.utils.cost_tracker import log_usage
 
 _SCORER_SYSTEM = "You are a quality assessment agent. Return only valid JSON."
 
@@ -38,6 +39,7 @@ class ScorerAgent:
                 system=_SCORER_SYSTEM,
                 messages=[{"role": "user", "content": prompt}],
             )
+            log_usage("claude-haiku-4-5-20251001", response.usage, "scorer/score")
             raw = response.content[0].text.strip()
             if "```" in raw:
                 raw = raw.split("```")[1]

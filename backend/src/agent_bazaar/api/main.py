@@ -1,8 +1,15 @@
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from agent_bazaar.api.routes import tasks, agents, websocket
 from agent_bazaar.storage.database import create_tables
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s  %(levelname)-8s  %(name)s  %(message)s",
+    datefmt="%H:%M:%S",
+)
 
 
 @asynccontextmanager

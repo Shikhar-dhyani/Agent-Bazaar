@@ -4,6 +4,7 @@ import anthropic
 from agent_bazaar.models.task import Task
 from agent_bazaar.models.subtask import Subtask, Capability
 from agent_bazaar.config import settings
+from agent_bazaar.utils.cost_tracker import log_usage
 
 _BROKER_SYSTEM = """You are a task decomposition broker for a multi-agent marketplace.
 Break the given task into 2–6 atomic subtasks that specialist agents will bid on and execute.
@@ -31,6 +32,7 @@ class BrokerAgent:
             system=_BROKER_SYSTEM,
             messages=[{"role": "user", "content": _BROKER_PROMPT.format(request=task.raw_request)}],
         )
+        log_usage("claude-sonnet-4-6", response.usage, "broker/decompose")
         raw = response.content[0].text.strip()
         # Strip accidental markdown fences
         if "```" in raw:
